@@ -1,4 +1,5 @@
 ﻿using Application.Staffs.Request;
+using Common.Models;
 using Domain.Entities;
 using Infrastructure.Repository;
 using System;
@@ -11,7 +12,7 @@ namespace Application.Staffs
 {
     public interface IStaffRespository
     {
-        public List<Staff> Filter();
+        public PaginatedList<Staff> Filter(FilterStaffRequest request);
         public Staff Add(CreateStaffRequest staff);
         public Staff Update(UpdateStaffRequest staff);
         public Staff DeleteById(Guid staffId);

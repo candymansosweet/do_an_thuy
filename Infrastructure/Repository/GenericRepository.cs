@@ -53,6 +53,10 @@ namespace Infrastructure.Repository
         {
             return _context.Set<TEntity>().Where(e => e.IsDeleted == false);
         }
+        public virtual int CountTotal()
+        {
+            return _context.Set<TEntity>().Count(e => e.IsDeleted == false);
+        }
         public void Dispose()
         {
            GC.SuppressFinalize(this);

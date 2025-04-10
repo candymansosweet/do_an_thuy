@@ -1,6 +1,8 @@
 ﻿using Application.Staffs.Request;
 using AutoMapper;
+using Azure.Core;
 using Common.Exceptions;
+using Common.Models;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Repository;
@@ -33,9 +35,11 @@ namespace Application.Staffs
             return staff;
 
         }
-        public List<Staff> Filter()
+        public PaginatedList<Staff> Filter(FilterStaffRequest request)
         {
-            return GetQueryable().ToList();
+            IQueryable<Staff> query = GetQueryable().OrderBy(s => s.CreatedDate).Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize);
+            PaginatedList<Staff> paginatedList = new PaginatedList<Staff>(query.ToList(), CountTotal(), request.PageNumber, request.PageSize);
+            return paginatedList;
         }
 
         public Staff Update(UpdateStaffRequest staff)

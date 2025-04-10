@@ -15,6 +15,7 @@ namespace Infrastructure
     public class ApplicationContext : DbContext
     {
         public DbSet<Staff> Staffs { get; set; }
+        public DbSet<Account> Accounts { get; set; }
         protected readonly IConfiguration Configuration;
         public ApplicationContext(IConfiguration configuration)
         {

@@ -19,11 +19,11 @@ namespace Web.API.Controllers
             _staffRespository = staffRespository;
         }
         [HttpGet]
-        public IActionResult Filter()
+        public IActionResult Filter([FromQuery] FilterStaffRequest request)
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, _staffRespository.Filter());
+                return StatusCode(StatusCodes.Status200OK, _staffRespository.Filter(request));
             }
             catch (AppException)
             {
