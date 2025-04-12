@@ -14,7 +14,7 @@ namespace Application.Staffs.Request
         public string Code { get; set; } // mã nhân viên
         public string FullName { get; set; } // họ tên
 
-        public Potition Potition { get; set; } // chức danh
+        public Position Position { get; set; } // chức danh
 
         public Department Department { get; set; } // phòng ban
 

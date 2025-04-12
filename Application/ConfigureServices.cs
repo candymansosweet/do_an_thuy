@@ -1,4 +1,6 @@
-﻿using Application.Staffs;
+﻿using Application.Common.UserService;
+using Application.Projects;
+using Application.Staffs;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -16,7 +18,9 @@ namespace Application
             //    .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Infrastructure"))
             //    .AddJsonFile("appsettings.json")
             //    .Build(); ;
-            services.AddScoped<IStaffRespository, StaffRespository>();
+            services.AddTransient<IStaffRespository, StaffRespository>();
+            services.AddTransient<IProjectRespository, ProjectRespository>();
+            services.AddScoped<IUserService, UserService>();
             var assembly = typeof(ConfigureServices).Assembly;
             //services.AddScoped<IJwtUtils, JwtUtils>();
 

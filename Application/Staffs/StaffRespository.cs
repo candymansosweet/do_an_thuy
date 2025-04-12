@@ -18,11 +18,19 @@ namespace Application.Staffs
     {
         public StaffRespository(ApplicationContext applicationContext, IMapper mapper) : base(applicationContext, mapper) { }
 
-        public Staff Add(CreateStaffRequest createStaffRequest)
+        public Staff Create(CreateStaffRequest createStaffRequest)
         {
             var staff = _mapper.Map<Staff>(createStaffRequest);
             Add(staff);
             return staff;
+        }
+        public Staff GetDetailById(Guid id)
+        {
+            Staff? staff = GetById(id);
+            if (staff == null){
+                throw new AppException(ExceptionCode.Notfound, "Staff not found");
+            }
+            return GetById(id);
         }
         public Staff DeleteById(Guid staffId)
         {

@@ -13,7 +13,8 @@ namespace Application.Staffs
     public interface IStaffRespository
     {
         public PaginatedList<Staff> Filter(FilterStaffRequest request);
-        public Staff Add(CreateStaffRequest staff);
+        public Staff GetDetailById(Guid request);
+        public Staff Create(CreateStaffRequest staff);
         public Staff Update(UpdateStaffRequest staff);
         public Staff DeleteById(Guid staffId);
 

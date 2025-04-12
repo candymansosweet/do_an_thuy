@@ -14,14 +14,22 @@ namespace Domain.Entities
         public string Code { get; set; } // mã nhân viên
         public string FullName { get; set; } // họ tên
 
-        public Potition Potition { get; set; } // chức danh
+        public Position Position { get; set; } // chức danh
 
         public Department Department { get; set; } // phòng ban
 
         public string Email { get; set; } // email
+
+        // Danh sách dự án mà nhân viên tham gia
+        [JsonIgnore]
+        public virtual List<ProjectMem> ProjectMems { get; set; } = new List<ProjectMem>();
+
+        // Danh sách dự án mà nhân viên bổ nhiệm người khác
+        [JsonIgnore]
+        public virtual List<ProjectMem> AppointedProjectMems { get; set; } = new List<ProjectMem>();
     }
 
-    public enum Potition
+    public enum Position
     {
         NhanVien,      // nhân viên
         QuanLy,        // quản lý

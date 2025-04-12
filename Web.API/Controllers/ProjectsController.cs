@@ -1,5 +1,5 @@
-﻿using Application.Staffs;
-using Application.Staffs.Request;
+using Application.Projects;
+using Application.Projects.Request;
 using Common.Exceptions;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
@@ -9,91 +9,93 @@ namespace Web.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StaffsController : ControllerBase
+    public class ProjectsController : ControllerBase
     {
-        private readonly IStaffRespository _staffRespository;
-        public StaffsController(
-            IStaffRespository staffRespository) : base(
-            )
+        private readonly IProjectRespository _projectRespository;
+        public ProjectsController(
+            IProjectRespository projectRespository)
         {
-            _staffRespository = staffRespository;
+            _projectRespository = projectRespository;
         }
-        [HttpGet]
-        public IActionResult Filter([FromQuery] FilterStaffRequest request)
-        {
-            try
-            {
-                return StatusCode(StatusCodes.Status200OK, _staffRespository.Filter(request));
-            }
-            catch (AppException)
-            {
-                throw; // Rethrow AppException to be handled by ErrorHandlerMiddleware
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-        [HttpPost]
-        public IActionResult Add([FromBody] CreateStaffRequest request)
-        {
-            try
-            {
-                return StatusCode(StatusCodes.Status200OK, _staffRespository.Create(request));
-            }
-            catch (AppException)
-            {
-                throw; // Rethrow AppException to be handled by ErrorHandlerMiddleware
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
 
+        [HttpGet]
+        public IActionResult Filter([FromQuery] FilterProjectRequest request)
+        {
+            try
+            {
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.Filter(request));
+            }
+            catch (AppException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
+
+        [HttpPost]
+        public IActionResult Add([FromBody] CreateProjectRequest request)
+        {
+            try
+            {
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.Create(request));
+            }
+            catch (AppException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetDetailById(Guid id)
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, _staffRespository.GetDetailById(id));
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.GetDetailById(id));
             }
             catch (AppException)
             {
-                throw; // Rethrow AppException to be handled by ErrorHandlerMiddleware
+                throw;
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-
         }
+
         [HttpPut]
-        public IActionResult Update([FromBody] UpdateStaffRequest request)
+        public IActionResult Update([FromBody] UpdateProjectRequest request)
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, _staffRespository.Update(request));
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.Edit(request));
             }
-            catch(AppException)
+            catch (AppException)
             {
-                throw; // Rethrow AppException to be handled by ErrorHandlerMiddleware
+                throw;
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id)
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, _staffRespository.DeleteById(id));
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.DeleteById(id));
             }
             catch (AppException)
             {
-                throw; // Rethrow AppException to be handled by ErrorHandlerMiddleware
+                throw;
             }
             catch (Exception ex)
             {
@@ -101,4 +103,4 @@ namespace Web.API.Controllers
             }
         }
     }
-}
+} 

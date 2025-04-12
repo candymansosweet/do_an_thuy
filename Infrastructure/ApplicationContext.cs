@@ -9,6 +9,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Entities;
+using Infrastructure.Configurations;
 
 namespace Infrastructure
 {
@@ -16,6 +17,8 @@ namespace Infrastructure
     {
         public DbSet<Staff> Staffs { get; set; }
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<ProjectMem> ProjectMems { get; set; }
         protected readonly IConfiguration Configuration;
         public ApplicationContext(IConfiguration configuration)
         {
@@ -29,8 +32,14 @@ namespace Infrastructure
             //    .Build();
             optionsBuilder.UseSqlServer(Configuration.GetConnectionString("SqlConnectionString"));
         }
-        public override int SaveChanges()
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new ProjectMemConfiguration());
+            base.OnModelCreating(modelBuilder);
+        }
+
+        public override int SaveChanges()
         {
             OnBeforeSaving();
             return base.SaveChanges();
