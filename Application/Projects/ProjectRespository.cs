@@ -108,7 +108,7 @@ namespace Application.Projects
             foreach (var memId in projectMemDeleteIds){
                 var mem = project.ProjectMems.First(en => en.StaffId == memId);
                 mem.IsDeleted = true;
-                _context.Entry(mem).State = EntityState.Detached;
+                _context.Entry(mem).State = EntityState.Modified;
             }
 
             // Thêm các ProjectMem mới
