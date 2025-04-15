@@ -12,6 +12,7 @@ namespace Domain.Entities
     {
         public string Name { get; set; }
         public string PasswordHash { get; set; }
+        public Guid StaffId { get; set; }
         public RoleValue.ROLE Role { get; set; }
     }
 }

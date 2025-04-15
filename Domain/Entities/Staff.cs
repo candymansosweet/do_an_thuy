@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Domain.Entities
 {
@@ -24,9 +19,9 @@ namespace Domain.Entities
         [JsonIgnore]
         public virtual List<ProjectMem> ProjectMems { get; set; } = new List<ProjectMem>();
 
-        // Danh sách dự án mà nhân viên bổ nhiệm người khác
+        // Danh sách công việc mà nhân viên tham gia
         [JsonIgnore]
-        public virtual List<ProjectMem> AppointedProjectMems { get; set; } = new List<ProjectMem>();
+        public virtual List<Task> Tasks { get; set; } = new List<Task>();
     }
 
     public enum Position

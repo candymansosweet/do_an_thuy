@@ -1,9 +1,11 @@
 using Application.Projects;
 using Application.Projects.Request;
+using Application.Tasks.Request;
 using Common.Exceptions;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Web.API.Services;
 
 namespace Web.API.Controllers
 {
@@ -12,10 +14,13 @@ namespace Web.API.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly IProjectRespository _projectRespository;
+        private readonly IUserService _userService;
         public ProjectsController(
+            IUserService userService,
             IProjectRespository projectRespository)
         {
             _projectRespository = projectRespository;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -34,13 +39,29 @@ namespace Web.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        [HttpPost("GetStatusTasks")]
+        public IActionResult GetStatusTasks([FromBody] GetStatusTasksProjectRequest request)
+        {
+            try
+            {
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.GetStatusTasks(request.Projectid));
+            }
+            catch (AppException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
 
         [HttpPost]
         public IActionResult Add([FromBody] CreateProjectRequest request)
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, _projectRespository.Create(request));
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.Create(request, _userService.GetStaffIdOnline()));
             }
             catch (AppException)
             {
@@ -74,7 +95,7 @@ namespace Web.API.Controllers
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, _projectRespository.Edit(request));
+                return StatusCode(StatusCodes.Status200OK, _projectRespository.Edit(request, _userService.GetStaffIdOnline()));
             }
             catch (AppException)
             {

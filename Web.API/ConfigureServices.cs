@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Common.Services.JwtTokenService;
+using Microsoft.OpenApi.Models;
+using Web.API.Services;
 
 namespace Web.API
 {
@@ -18,6 +20,7 @@ namespace Web.API
                     options.TimestampFormat = "yyyy-MM-dd HH:mm:ss ";
                 }
             );
+            services.AddScoped<IUserService, UserService>();
 
             services.AddControllers();
             services.AddEndpointsApiExplorer();

@@ -9,7 +9,6 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Entities;
-using Infrastructure.Configurations;
 
 namespace Infrastructure
 {
@@ -19,11 +18,14 @@ namespace Infrastructure
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectMem> ProjectMems { get; set; }
+        public DbSet<Domain.Entities.Task> Tasks { get; set; }
+        public DbSet<TaskFile> TaskFiles { get; set; }
         protected readonly IConfiguration Configuration;
         public ApplicationContext(IConfiguration configuration)
         {
             Configuration = configuration;
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -32,11 +34,16 @@ namespace Infrastructure
             //    .Build();
             optionsBuilder.UseSqlServer(Configuration.GetConnectionString("SqlConnectionString"));
         }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new ProjectMemConfiguration());
             base.OnModelCreating(modelBuilder);
+
+            // Apply DeleteBehavior.Restrict to all foreign keys
+            foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
+                         .SelectMany(e => e.GetForeignKeys()))
+            {
+                foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            }
         }
 
         public override int SaveChanges()
@@ -74,6 +81,7 @@ namespace Infrastructure
                     case EntityState.Unchanged:
                         break;
                     case EntityState.Deleted:
+                        entry.Property("IsDeleted").CurrentValue = true;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

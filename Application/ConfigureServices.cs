@@ -1,6 +1,11 @@
-﻿using Application.Common.UserService;
+﻿using Application.Accounts;
+using Application.Authenticates;
+using Application.FileStorages;
+using Application.PathServices;
 using Application.Projects;
 using Application.Staffs;
+using Application.Tasks;
+using Common.Services.JwtTokenService;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -20,7 +25,12 @@ namespace Application
             //    .Build(); ;
             services.AddTransient<IStaffRespository, StaffRespository>();
             services.AddTransient<IProjectRespository, ProjectRespository>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddTransient<ITaskRespository, TaskRespository>();
+            services.AddTransient<IAccountRepository, AccountRepository>();
+            services.AddTransient<IAuthenticateRespository, AuthenticateRespository>();
+            services.AddTransient<IFileStorageService, FileStorageService>();
+            services.AddTransient<IPathService, PathService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
             var assembly = typeof(ConfigureServices).Assembly;
             //services.AddScoped<IJwtUtils, JwtUtils>();
 

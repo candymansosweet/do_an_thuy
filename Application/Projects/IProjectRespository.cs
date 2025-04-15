@@ -7,10 +7,12 @@ namespace Application.Projects
 {
     public interface IProjectRespository
     {
-        ProjectResponse Create(CreateProjectRequest createProjectRequest);
+        ProjectResponse Create(CreateProjectRequest createProjectRequest, Guid staffId);
         ProjectResponse GetDetailById(Guid id);
         ProjectResponse DeleteById(Guid projectId);
         PaginatedList<ProjectResponse> Filter(FilterProjectRequest request);
-        ProjectResponse Edit(UpdateProjectRequest request);
+        ProjectResponse Edit(UpdateProjectRequest request, Guid staffId);
+        GetStatusTasksResponse GetStatusTasks(string? projectId);
+
     }
 } 

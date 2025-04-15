@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain;
+using Domain.Entities;
 using Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repository
 {
@@ -24,7 +26,12 @@ namespace Infrastructure.Repository
             _context.SaveChanges();
             return entity;
         }
-
+        public virtual TEntity DeleteSub(TEntity entity)
+        {
+            entity.IsDeleted = true;
+            _context.Entry(entity).State = EntityState.Modified; // Expected: Modified
+            return entity;
+        }
         public virtual TEntity Update(TEntity entity)
         {
             _context.Update(entity);

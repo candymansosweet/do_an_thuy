@@ -68,7 +68,7 @@ namespace Infrastructure.Migrations
                         column: x => x.ManagerId,
                         principalTable: "Staffs",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -80,7 +80,6 @@ namespace Infrastructure.Migrations
                     StaffId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     JoinDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AppointedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProjectId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
@@ -92,38 +91,20 @@ namespace Infrastructure.Migrations
                         name: "FK_ProjectMems_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ProjectMems_Projects_ProjectId1",
-                        column: x => x.ProjectId1,
-                        principalTable: "Projects",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ProjectMems_Staffs_AppointedById",
-                        column: x => x.AppointedById,
-                        principalTable: "Staffs",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ProjectMems_Staffs_StaffId",
                         column: x => x.StaffId,
                         principalTable: "Staffs",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProjectMems_AppointedById",
-                table: "ProjectMems",
-                column: "AppointedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectMems_ProjectId",
                 table: "ProjectMems",
                 column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProjectMems_ProjectId1",
-                table: "ProjectMems",
-                column: "ProjectId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectMems_StaffId",

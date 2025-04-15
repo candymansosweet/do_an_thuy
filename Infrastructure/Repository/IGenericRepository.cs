@@ -13,5 +13,6 @@ namespace Infrastructure.Repository
         TEntity Delete(TEntity entity);
         TEntity GetById(Guid id);
         List<TEntity> GetAll();
+        IQueryable<TEntity> GetQueryable();
     }
 }

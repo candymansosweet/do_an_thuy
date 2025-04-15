@@ -1,6 +1,6 @@
-using Application.Common.UserService;
 using Application.Projects.Request;
 using Application.Projects.Response;
+using Application.Tasks;
 using AutoMapper;
 using Common.Exceptions;
 using Common.Models;
@@ -14,20 +14,20 @@ namespace Application.Projects
     public class ProjectRespository: BaseRepository<Project>, IProjectRespository
     {
         private readonly IMapper _mapper;
-        private readonly IUserService _userService;
-        public ProjectRespository(ApplicationContext applicationContext, IMapper mapper, IUserService userService) : base(applicationContext, mapper) {
+        private readonly ITaskRespository _taskRespository;
+        public ProjectRespository(ApplicationContext applicationContext, IMapper mapper, ITaskRespository taskRespository) : base(applicationContext, mapper) {
             _mapper = mapper;
-            _userService = userService;
+            _taskRespository = taskRespository;
         }
 
-        public ProjectResponse Create(CreateProjectRequest createProjectRequest)
+        public ProjectResponse Create(CreateProjectRequest createProjectRequest, Guid staffId)
         {
             var project = _mapper.Map<Project>(createProjectRequest);
             project.ProjectMems = createProjectRequest.ProjectMemIds.Select(
                 id => new ProjectMem { 
                     ProjectId = project.Id, 
                     StaffId = id,
-                    AppointedById = _userService.GetUserIdOnline()
+                    AppointedById = staffId
                 }).ToList();
             Add(project);
             return _mapper.Map<ProjectResponse>(project);
@@ -36,7 +36,7 @@ namespace Application.Projects
         public ProjectResponse GetDetailById(Guid id)
         {
             Project? project = GetQueryable()
-                .Include(p => p.ProjectMems)
+                .Include(p => p.ProjectMems.Where(en => en.IsDeleted == false))
                     .ThenInclude(pm => pm.Staff)
                 .Include(p => p.Manager)
                 .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
@@ -55,17 +55,29 @@ namespace Application.Projects
             {
                 throw new AppException(ExceptionCode.Notfound, "Project not found");
             }
-            Delete(project);
+            var projectMems = _context.ProjectMems.Where(_ => _.ProjectId == projectId).ToList();
+            if(projectMems.Any())
+            {
+                _context.ProjectMems.RemoveRange(projectMems);
+                _context.SaveChanges();
+
+
+            }
+            project.DeleteMe();
+            _context.Projects.Update(project);
+
+
+            _context.SaveChanges();
             return _mapper.Map<ProjectResponse>(project);
         }
 
         public PaginatedList<ProjectResponse> Filter(FilterProjectRequest request)
         {
             IQueryable<Project> query = GetQueryable()
-                .Include(p => p.ProjectMems)
+                .Include(p => p.ProjectMems.Where(en => en.IsDeleted == false))
                     .ThenInclude(pm => pm.Staff)
                 .Include(p => p.Manager)
-                .OrderBy(p => p.CreatedDate)
+                .OrderByDescending(p => p.CreatedDate)
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize);
 
@@ -75,59 +87,63 @@ namespace Application.Projects
             return new PaginatedList<ProjectResponse>(responses, CountTotal(), request.PageNumber, request.PageSize);
         }
 
-        public ProjectResponse Edit(UpdateProjectRequest request)
+        public ProjectResponse Edit(UpdateProjectRequest request, Guid staffId)
         {
-                var project = GetQueryable()
-                    .Include(p => p.ProjectMems.Where(en => en.IsDeleted != true))
-                    .FirstOrDefault(p => p.Id == request.Id);
+            var project = GetQueryable()
+                .Include(p => p.ProjectMems.Where(en => en.IsDeleted != true))
+                .FirstOrDefault(p => p.Id == request.Id);
 
-                if (project == null)
-                    throw new AppException(ExceptionCode.Notfound, "Project not found");
+            if (project == null)
+                throw new AppException(ExceptionCode.Notfound, "Project not found");
 
-                // Update các trường khác
-                _mapper.Map(request, project);
-            project.ProjectMems.Add(new ProjectMem
-            {
-                ProjectId = project.Id,
-                StaffId = request.ProjectMemIds[0],
-                AppointedById = _userService.GetUserIdOnline()
-            });
-            foreach (var item in project.ProjectMems)
-            {
-                item.IsDeleted = true;
-                _context.Entry(item).State = EntityState.Added; // Expected: Modified
+            // Update các trường khác
+            _mapper.Map(request, project);
+
+            var listCurrentMemId = project.ProjectMems.Select(en => en.StaffId).ToList();
+
+            var projectMemDeleteIds = listCurrentMemId.Except(request.ProjectMemIds);
+            var projectMemAddIds = request.ProjectMemIds.Except(listCurrentMemId);
+
+            // Xóa các ProjectMem cũ
+            foreach (var memId in projectMemDeleteIds){
+                var mem = project.ProjectMems.First(en => en.StaffId == memId);
+                mem.IsDeleted = true;
+                _context.Entry(mem).State = EntityState.Detached;
             }
-            foreach (var item in project.ProjectMems)
-            {
-            }
-            //var newIds = request.ProjectMemIds.ToHashSet();
-            //var existing = project.ProjectMems.ToList();
-            //var existingIds = existing.Select(pm => pm.StaffId).ToHashSet();
 
-            //var userId = _userService.GetUserIdOnline();
-
-            //// Xóa ProjectMems cũ nếu không còn trong request
-            //foreach (var oldPm in existing.Where(pm => !newIds.Contains(pm.StaffId)).ToList())
-            //{
-            //    _context.ProjectMems.Remove(oldPm);
-            //}
-
-            //// Thêm mới những ProjectMem chưa có
-            //foreach (var newId in newIds.Except(existingIds))
-            //{
-            //_context.ProjectMems.Add(new ProjectMem
-            //    {
-            //        ProjectId = project.Id,
-            //        StaffId = newId,
-            //        AppointedById = userId
-            //    });
-            //}
-
+            // Thêm các ProjectMem mới
+            foreach (var memId in projectMemAddIds){
+                var mem = new ProjectMem(){
+                    ProjectId = project.Id,
+                    StaffId = memId,
+                    AppointedById = staffId
+                };
+                project.ProjectMems.Add(mem);
+                _context.Entry(mem).State = EntityState.Added;
+            }       
             Update(project); // Chỉ cập nhật project chính
 
             //Update(project);
             return _mapper.Map<ProjectResponse>(project);
         }
-
+        public GetStatusTasksResponse GetStatusTasks(string? projectId)
+        {
+            GetStatusTasksResponse response = new GetStatusTasksResponse();
+            var now = DateTime.Now;
+            var query =  _taskRespository.GetQueryable();
+            if (!String.IsNullOrEmpty(projectId))
+            {
+                query = query.Where(en => en.ProjectId == Guid.Parse(projectId));
+            }
+            response.NotStarted = query.Count(en => en.Status == Domain.Entities.TaskStatus.NotStarted);
+            response.InProgress = query.Count(
+                en => en.Status == Domain.Entities.TaskStatus.InProgress
+            );
+            response.Completed = query.Count(en => en.Status == Domain.Entities.TaskStatus.Completed);
+            response.Overdue = query.Count(
+                en => en.DeadlineDate < now
+            );
+            return response;
+        }
     }
 } 

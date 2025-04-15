@@ -20,6 +20,12 @@ namespace Application.Staffs
 
         public Staff Create(CreateStaffRequest createStaffRequest)
         {
+            Staff? staffCMD = GetQueryable().FirstOrDefault(en => en.Code == createStaffRequest.Code);
+            if(staffCMD != null)
+            {
+                throw new AppException(ExceptionCode.Notfound, "Trùng mã nhân viên");
+            }
+
             var staff = _mapper.Map<Staff>(createStaffRequest);
             Add(staff);
             return staff;
@@ -39,13 +45,20 @@ namespace Application.Staffs
             {
                 throw new AppException(ExceptionCode.Notfound, "Staff not found");
             }
-            Delete(staff);
+            Account? account = _context.Accounts.FirstOrDefault(a => a.StaffId == staff.Id);
+            if (account != null)
+            {
+                _context.Accounts.Remove(account);
+            }
+            _context.Staffs.Remove(staff);
+            _context.SaveChanges();
+
             return staff;
 
         }
         public PaginatedList<Staff> Filter(FilterStaffRequest request)
         {
-            IQueryable<Staff> query = GetQueryable().OrderBy(s => s.CreatedDate).Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize);
+            IQueryable<Staff> query = GetQueryable().OrderByDescending(s => s.CreatedDate).Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize);
             PaginatedList<Staff> paginatedList = new PaginatedList<Staff>(query.ToList(), CountTotal(), request.PageNumber, request.PageSize);
             return paginatedList;
         }
@@ -57,6 +70,9 @@ namespace Application.Staffs
             {
                 throw new AppException(ExceptionCode.Notfound, "Staff not found");
             }
+            var existingAccount1 = GetQueryable().FirstOrDefault(a => a.Code == staff.Code);
+            if (existingAccount1 != null && existingAccount1.Id != staffCMD.Id)
+                throw new AppException(ExceptionCode.Notfound, "Trùng mã nhân viên");
             _mapper.Map(staff, staffCMD);
             Update(staffCMD);
             return staffCMD;

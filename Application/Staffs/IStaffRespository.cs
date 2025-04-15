@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Staffs
 {
-    public interface IStaffRespository
+    public interface IStaffRespository: IGenericRepository<Staff>
     {
         public PaginatedList<Staff> Filter(FilterStaffRequest request);
         public Staff GetDetailById(Guid request);

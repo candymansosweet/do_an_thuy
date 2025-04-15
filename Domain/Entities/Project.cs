@@ -23,6 +23,9 @@ namespace Domain.Entities
         public DateTime DeadlineDate { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public virtual List<ProjectMem> ProjectMems { get; set; } = new List<ProjectMem>();
+        // Danh sách công việc của dự án
+        [JsonIgnore]
+        public virtual List<Task> Tasks { get; set; } = new List<Task>();
 
     }
 } 
